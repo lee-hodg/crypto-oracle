@@ -1,0 +1,100 @@
+{% extends "predictor/base.html" %}
+{% load static %}
+{% block subtag %} Evaluate {% endblock %}
+
+{% block charts %}
+<form>
+    <div class="form-group">
+        <div class="input-group">
+            <select class="form-control" id="session_select">
+                {% for ts in training_session_objs %}
+                <option id="{{ts.id}}">{{ts.name}}: interval {{ ts.interval}}: {{ts.start_date|date:"Y-n-j"}} to {{ ts.end_date|date:"Y-n-j"}}: epochs {{ts.epochs}}:
+                    win len {{ts.window_length}}: out size {{ts.output_size}}: neurons {{ ts.neurons }}: loss {{ts.loss}}: scaler {{ts.scaler}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <!--        <label for="exampleFormControlSelect1">Select training session</label>-->
+
+    </div>
+
+</form>
+
+
+<!--top chart-->
+<div class="row">
+    <img class="ajax-loader mt-5" src="{% static 'predictor/ajax-loader.gif' %}" />
+    <div class="col-12">
+        <div id="{{ids.0}}" class="chart"></div>
+    </div>
+</div>
+<div class="row">
+    <img  class="ajax-loader mt-5" src="{% static 'predictor/ajax-loader.gif' %}" />
+    <div class="col-12">
+        <div id="{{ids.1}}" class="chart"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            $(".ajax-loader").show();
+            $(".chart").hide()
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+
+            }
+        }
+    });
+
+    $(document).on('change', '#session_select', function(){
+        let training_session_id = $(this).children(":selected").attr("id");
+
+        console.debug('got session id: ' + training_session_id)
+
+        if (training_session_id == "") {
+            console.error('Missing training session id.');
+            return false;
+        }
+        $.ajax({
+            url: "{% url 'predictor_evaluations' %}",
+            type: "POST",
+            data: {
+                "training_session_id": training_session_id,
+                //'csrfmiddlewaretoken':
+            },
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            //contentType: "application/json",
+            //contentType: "application/json;charset=utf-8",
+            // headers: {'X-CSRFToken': getCookie('csrftoken')},
+            dataType: "json",
+            success: function(res_data) {
+                //alert(data);
+                //plots the figure with id
+                //id must match the div id above in the html
+                let figures = JSON.parse(res_data.figuresJSON);
+                let ids = res_data.ids;
+                $(".chart").show()
+
+                for (let i in figures) {
+                    console.log('Loop numb:' + i);
+                    // console.debug(ids[i])
+                    //$('#'+ids[i]).empty()
+                    //console.debug($('#'+ids[i]))
+                    Plotly.newPlot(ids[i], figures[i].data, figures[i].layout || {});
+                    // Plotly.plot(ids[i],
+                    //     figures[i].data,
+                    //     figures[i].layout || {});
+                }
+                $(".ajax-loader").hide();
+            },
+            error: function(ts) {
+                console.error(ts);
+            }
+        });
+    });
+</script>
+{% endblock %}
