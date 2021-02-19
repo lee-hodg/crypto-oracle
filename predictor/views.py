@@ -76,7 +76,7 @@ def index(request):
     :return:
     """
     now = timezone.now()
-    start_date = now - timedelta(days=90)
+    start_date = now - timedelta(days=5)
     end_date = now
 
     qs = Stock.objects.filter(Q(dt__gte=start_date) & Q(dt__lte=end_date)).order_by('dt')
@@ -134,7 +134,7 @@ def forecast(request):
     if request.is_ajax():
         return JsonResponse(ctx_data)
     else:
-        ctx_data['training_session_objs'] = TrainingSession.objects.all()
+        ctx_data['training_session_objs'] = TrainingSession.objects.filter(evaluation_session=False)
         return render(request, 'predictor/forecast.html', ctx_data)
 
 
@@ -167,5 +167,5 @@ def evaluations(request):
     if request.is_ajax():
         return JsonResponse(ctx_data)
     else:
-        ctx_data['training_session_objs'] = TrainingSession.objects.all()
+        ctx_data['training_session_objs'] = TrainingSession.objects.filter(evaluation_session=True)
         return render(request, 'predictor/evaluations.html', ctx_data)

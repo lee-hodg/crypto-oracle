@@ -68,6 +68,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-N', '--stock-name', dest='name', default='btcusd',
                             type=str, help='Stock name e.g. BTCUSD')
+        parser.add_argument('-V', '--evaluation-session', dest='evaluation_session', default=True,
+                            type=bool, help='Is this an evaluation sess (train/test split) or prod?')
         parser.add_argument('-S', '--start-date', dest='start_date', default='2018-01-01',
                             type=valid_date, help='Start date')
         parser.add_argument('-E', '--end-date', dest='end_date',
@@ -110,12 +112,21 @@ class Command(BaseCommand):
 
         start_date = options.get('start_date')
         end_date = options.pop('end_date')
+        evaluation_session = options.get('evaluation_session')
+        if evaluation_session:
+            if options['training_size'] != 1:
+                logger.warning(f'For evaluation session overriding training split to 1 (no test set)')
+            options['training_size'] = 1
 
         # If we want to update the model to new end date with fresh data
         existing_id = options.pop('existing_id', None)
         if existing_id:
             try:
                 training_session = TrainingSession.objects.get(id=existing_id)
+                if training_session.evaluation_session:
+                    logger.error(f'Cannot update evaluation session with id {existing_id}.'
+                                 f' Only production sessions can be updated to all latest stocks...')
+                    return
             except TrainingSession.DoesNotExist:
                 logger.error(f'No training session with id {existing_id}')
         else:

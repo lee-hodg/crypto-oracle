@@ -51,6 +51,10 @@ class TrainingSession(models.Model):
     # This will be where save the model weights
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
+    # Evaluation sessions will have the train/test split and won't be updated with bleeding edge stocks
+    # production models will use all available data. Training until the bleeding edge
+    evaluation_session = models.BooleanField(default=True)
+
     # The name of the stock
     NAMES = Choices(('btcusd', _('BTCUSD')), ('ethusd', _('ETHUSD')))
     name = models.CharField(choices=NAMES, default=NAMES.btcusd, max_length=20)
