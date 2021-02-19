@@ -12,6 +12,7 @@ import plotly.graph_objs as go
 from django_pandas.io import read_frame
 
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
+from scipy import stats
 from dateutil.tz import tzutc
 from dateutil.parser import parse
 from django.utils.timezone import make_aware
@@ -474,6 +475,28 @@ def get_forecast_plots(training_session_id, start_date, end_date):
     return graph, layout
 
 
+def get_long_short(predicted_close, current_close):
+    """
+    Generate the signals long, short
+
+    Parameters
+    ----------
+    predicted_close : close price predicted at next interval
+    current_close: close price now
+
+    Returns
+    -------
+    long_short : DataFrame
+        The long, short, and do nothing signals for each ticker and date
+    """
+    # If predicted close is greater than the current close then we long
+    df1 = (predicted_close >= current_close).astype(int)
+    # Otherwise we short if less
+    df2 =  -(predicted_close < current_close).astype(int)
+    # Combine the 2 (note if no action we'd have False->0 in both)
+    return df1 + df2
+
+
 def get_evaluation_plot(training_session_id, eval_type='train'):
 
     # Load the Django model corresponding to these options
@@ -498,18 +521,55 @@ def get_evaluation_plot(training_session_id, eval_type='train'):
     df = df[df['dt'] >= start_date]
     df = df[df['dt'] <= end_date]
 
-    graph = []
+    graph_0 = []
     for col in ['actual', 'prediction']:
-        graph.append(go.Scatter(x=df.dt.tolist(),
+        graph_0.append(go.Scatter(x=df.dt.tolist(),
                                 y=df[col].tolist(),
                                 mode='lines',
                                 name=col)
                      )
 
-    layout = dict(title=f'Actual vs predicted price over time ({eval_type} set) {training_session.id}',
+    layout_0 = dict(title=f'Actual vs predicted price over time ({eval_type} set) {training_session.id}',
                   xaxis=dict(title='Date',
                              autotick=True),
                   yaxis=dict(title="Price"),
                   )
 
-    return graph, layout
+    # Do some profit and significance analysis w/ basic trading strat
+    df['actual_shift'] = df['actual'].shift(-1)
+    df['prediction_shift'] = df['prediction'].shift(-1)
+    df['signal'] = get_long_short(df['prediction_shift'], df['prediction'])
+    df['true_signal'] = get_long_short(df['actual_shift'], df['actual'])
+    df['return'] = (df['actual_shift'] - df['actual'])/df['actual']
+    df['signal_return'] = df['signal'] * df['return']
+    df['profit'] = (df['signal_return'].astype(float)+1.0).cumprod()
+    df['matches'] = (df['true_signal'] == df['signal']).astype(int)
+    mu_null = 0.5
+    alpha = 0.05
+    pop_mean = df['matches'].mean()
+    t, p = stats.ttest_1samp(df['matches'], mu_null)
+    # 1 sided
+    p = p/2
+    logger.debug(f'Got p {p} and t {t}')
+    reject_null = False
+    if t > 0 and p/2 < alpha:
+        # We are looking for greater than 0.5 at level alpha (if t< 0 it means the mean was actually less
+        # than 0.5 and no way we reject it the null and claim we are doing better than 50% coin...we may
+        # even be doing worse with some signif like 0.4 matches)
+        reject_null = True
+    graph_1 = [go.Scatter(x=df.dt.tolist(),
+                              y=df['profit'].tolist(),
+                              mode='lines',
+                              name='profit')
+               ]
+
+    layout_1 = dict(title=f'Stategy profit over time. Mean: {pop_mean:.2f}, p-value: {p:.2f}, t-score: {t:.2f}.'
+                          f'Reject null: {reject_null}',
+                    xaxis=dict(title='Date',
+                               autotick=True),
+                    yaxis=dict(title="% Profit"),
+                    )
+
+    return [(graph_0, layout_0), (graph_1, layout_1)]
+
+

@@ -148,12 +148,15 @@ def evaluations(request):
     # Which session are we predicting with?
     training_session_id = request.POST.get('training_session_id', 'ba319bc2-9345-4a6d-8226-f42641a2fac8')
 
-    graph_0, layout_0 = get_evaluation_plot(training_session_id, eval_type='train')
-    graph_1, layout_1 = get_evaluation_plot(training_session_id, eval_type='test')
+    (graph_a_0, layout_a_0), (graph_a_1, layout_a_1) = get_evaluation_plot(training_session_id, eval_type='train')
+    (graph_b_0, layout_b_0), (graph_b_1, layout_b_1) = get_evaluation_plot(training_session_id, eval_type='test')
 
     # append all charts to the figures list
-    figures = [dict(data=graph_0, layout=layout_0),
-               dict(data=graph_1, layout=layout_1)]
+    figures = [dict(data=graph_a_0, layout=layout_a_0),
+               dict(data=graph_a_1, layout=layout_a_1),
+               dict(data=graph_b_0, layout=layout_b_0),
+               dict(data=graph_b_1, layout=layout_b_1)
+               ]
 
     # plot ids for the html id tag
     ids = [f'figure-{i}' for i, _ in enumerate(figures)]
