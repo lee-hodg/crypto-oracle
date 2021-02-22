@@ -1,4 +1,3 @@
-Warning: The lock file is not up to date with the latest changes in pyproject.toml. You may be getting outdated dependencies. Run update to update them.
 absl-py==0.11.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.2.0"
 asgiref==3.3.1; python_version >= "3.6"
 astunparse==1.6.3
