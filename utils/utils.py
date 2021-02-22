@@ -185,7 +185,7 @@ def preprocessing(df, training_session, start_date=None, end_date=None, column_n
         * Split into training and test sets
         * Do the type of scaling we desire, e.g. with StandardScaler or MinMaxScaler.
         * We fit to the training set (and not separately to the test as that would be a bias too).
-        * We then have to transform the series to the 2D array the scaler expects and back again to 1D
+        * We then have to transform the series to the 2D array the scaler expects  and back again to 1D
         * Finally we window the dataset to provide the feature/target data to train on
 
     :param df: The dataframe with prices/vol data
@@ -558,12 +558,12 @@ def get_evaluation_plot(training_session_id, eval_type='train'):
         # even be doing worse with some signif like 0.4 matches)
         reject_null = True
     graph_1 = [go.Scatter(x=df.dt.tolist(),
-                              y=df['profit'].tolist(),
-                              mode='lines',
-                              name='profit')
+                          y=df['profit'].tolist(),
+                          mode='lines',
+                          name='profit')
                ]
 
-    layout_1 = dict(title=f'Stategy profit over time. Mean: {pop_mean:.2f}, p-value: {p:.2f}, t-score: {t:.2f}.'
+    layout_1 = dict(title=f'Profit over time. Mean: {pop_mean:.2f}, p-value: {p:.2f}, t-score: {t:.2f}.'
                           f'Reject null: {reject_null}',
                     xaxis=dict(title='Date',
                                autotick=True),
