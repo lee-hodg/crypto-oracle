@@ -177,3 +177,7 @@ LOGGING = {
 
 
 COINAPI_KEY = '38E75959-B950-4001-AD67-D0FD3FA1226B'
+
+# Configure Django App for Heroku.
+import django_heroku
+django_heroku.settings(locals())

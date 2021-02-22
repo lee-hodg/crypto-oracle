@@ -1,4 +1,4 @@
-# crypto-oracle
+# Crypto Oracle
 
 This app explores the use of Long-short term memory (LSTM) neural networks in predicting the price
 of the cryptocurrency Bitcoin. 
@@ -203,3 +203,16 @@ the p-value could be low but the t-score is negative meaning
 the sample mean was actually less than 0.5...lossing money :())
 
 
+# Heroku deploy and setup
+
+See also [here](https://devcenter.heroku.com/articles/getting-started-with-python#deploy-the-app)
+
+Create the heroku app with
+
+```bash
+heroku create
+```
+
+```bash
+git push heroku master
+```
