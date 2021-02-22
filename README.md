@@ -203,6 +203,59 @@ the p-value could be low but the t-score is negative meaning
 the sample mean was actually less than 0.5...lossing money :())
 
 
+# Package management
+
+[Poetry](https://python-poetry.org/docs/) is used to manage dependencies.
+
+To set up the existing project for poetry first execute
+
+```python
+poetry init
+```
+
+This will generate the `pyproject.toml` file, with the dependencies and dev dependencies
+
+For convenience during development we also have the following dev dependencies
+
+```python
+django-debug-toolbar
+coloredlogs
+Werkzeug
+django-extensions
+```
+
+Next run
+
+```
+poetry install
+```
+
+Adding and removing packages with poetry:
+
+```bash
+poetry add X --dev # dev only
+poetry add Y  # non -dev
+poetry remove Z  # remove
+```
+
+Updating
+
+```bash
+poetry update X
+```
+
+Generating a regular `requirements.txt`
+
+```bash
+poetry export -f requirements.txt > requirements.txt --without-hashes
+```
+
+The location of the virtualenv set up by poetry can be found by running
+
+```bash
+poetry config --list 
+```
+
 # Heroku deploy and setup
 
 See also [here](https://devcenter.heroku.com/articles/getting-started-with-python#deploy-the-app)
