@@ -209,9 +209,40 @@ See also [here](https://devcenter.heroku.com/articles/getting-started-with-pytho
 
 Create the heroku app with
 
+The project uses [whitenoise](http://whitenoise.evans.io/en/stable/) for self-serving on static files
+This involved adding the package with Poetry and then adding to the Django Middleware
+
+```python
+MIDDLEWARE = [
+  # 'django.middleware.security.SecurityMiddleware',
+  'whitenoise.middleware.WhiteNoiseMiddleware',
+  # ...
+]
+```
+
+We also use the [django-heroku](https://github.com/heroku/django-heroku) to care of a bunch
+of things like `ALLOWED_HOSTS` and static files settings.
+
+
+Create the app on Heroku
+
 ```bash
 heroku create
 ```
+The key can be generated with the command
+
+```bash
+python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+```
+
+Set some environment variables
+
+```bash
+heroku config:set DJANGO_SECRET_KEY="XXXX"
+heroku config:set DJANGO_RUNTIME_ENVIRONMENT="production"
+```
+
+Now deploy with
 
 ```bash
 git push heroku master
