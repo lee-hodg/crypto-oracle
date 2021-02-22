@@ -1,6 +1,0 @@
-*.ipynb
-*.csv
-model_weights/*
-notebooks/*
-data/**
-scalers/**

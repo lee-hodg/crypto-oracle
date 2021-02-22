@@ -50,9 +50,6 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # Static files heroku
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -88,14 +85,15 @@ WSGI_APPLICATION = 'cryptooracle.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'cryptooracle_db',
-        'USER': 'coracle',
-        'PASSWORD': 'XXXXX',
-        'HOST': 'XXXXX',
-        'PORT': 'XXXXX',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ['RDS_DB_NAME'],
+        'USER': os.environ['RDS_USERNAME'],
+        'PASSWORD': os.environ['RDS_PASSWORD'],
+        'HOST': os.environ['RDS_HOSTNAME'],
+        'PORT': os.environ['RDS_PORT'],
     }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -182,6 +180,3 @@ LOGGING = {
 
 COINAPI_KEY = '38E75959-B950-4001-AD67-D0FD3FA1226B'
 
-# Configure Django App for Heroku.
-import django_heroku
-django_heroku.settings(locals())

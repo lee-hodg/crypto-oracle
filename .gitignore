@@ -92,3 +92,8 @@ test-reports/*
 
 # Local settings
 local.py
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml
