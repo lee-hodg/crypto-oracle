@@ -242,7 +242,11 @@ def preprocessing(df, training_session, start_date=None, end_date=None, column_n
     if sc is not None:
         # Fit on training, transform only the test
         training_data = sc.fit_transform(training_df.values.reshape(-1, 1)).flatten()
-        test_data = sc.transform(test_df.values.reshape(-1, 1)).flatten()
+        if len(test_df):
+            # sometimes no test data for prod sessions
+            test_data = sc.transform(test_df.values.reshape(-1, 1)).flatten()
+        else:
+            test_data = test_df.values
         # Remember sc.inverse_transform should transform back the data too so we return the scaler too
     else:
         training_data = training_df.values

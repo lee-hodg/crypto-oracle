@@ -14,6 +14,14 @@ from predictor.models import Stock
 logger = logging.getLogger(__name__)
 
 
+def str_to_bool(value):
+    if value.lower() in {'false', 'f', '0', 'no', 'n'}:
+        return False
+    elif value.lower() in {'true', 't', '1', 'yes', 'y'}:
+        return True
+    raise ValueError(f'{value} is not a valid boolean value')
+
+
 def build_model(output_size, neurons, activation_func, dropout, loss, optimizer):
     """
     Build the Keras model specified by the params. This will be an LSTM model with an initial 1DConv layer
@@ -68,8 +76,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('-N', '--stock-name', dest='name', default='btcusd',
                             type=str, help='Stock name e.g. BTCUSD')
-        parser.add_argument('-V', '--evaluation-session', dest='evaluation_session', default=True,
-                            type=bool, help='Is this an evaluation sess (train/test split) or prod?')
+        parser.add_argument('-V', '--evaluation-session', dest='evaluation_session',
+                            type=str_to_bool, default=True,
+                            help='Is this an evaluation sess (train/test split) or prod?')
         parser.add_argument('-S', '--start-date', dest='start_date', default='2018-01-01',
                             type=valid_date, help='Start date')
         parser.add_argument('-E', '--end-date', dest='end_date',
@@ -111,11 +120,11 @@ class Command(BaseCommand):
         [options.pop(el) for el in unwanted_options]
 
         start_date = options.get('start_date')
-        end_date = options.pop('end_date')
+        end_date = options.get('end_date')
         evaluation_session = options.get('evaluation_session')
-        if evaluation_session:
+        if not evaluation_session:
             if options['training_size'] != 1:
-                logger.warning(f'For evaluation session overriding training split to 1 (no test set)')
+                logger.warning(f'For production session overriding training split to 1 (no test set)')
             options['training_size'] = 1
 
         # If we want to update the model to new end date with fresh data
@@ -164,14 +173,16 @@ class Command(BaseCommand):
 
         logger.debug(f'Training from {start_date} to {end_date}')
         # Load the data
+        logger.debug('Load data... (may take a while)')
         sc, windowed_training_data, training_data, test_data, training_dates, test_dates\
             = load_data(training_session, start_date=start_date, end_date=end_date)
-
+        logger.debug('Data loaded...')
         if len(training_data) == 0:
             logger.debug('No new data to update')
             return
 
         # Fit the model
+        logger.debug('Begin fitting....')
         training_history = model.fit(windowed_training_data, epochs=training_session.epochs,
                                      batch_size=training_session.batch_size, verbose=1)
         training_session.training_history[timezone.now().isoformat()] = training_history.history
@@ -181,6 +192,7 @@ class Command(BaseCommand):
         training_session.test_dates.extend([d.isoformat() for d in test_dates.to_list()])
 
         # Save the model weights
+        logger.debug('Saving weights...')
         if os.path.exists(training_session.weights_path):
             # Move old weights file to archive
             old_file = training_session.weights_path
@@ -193,10 +205,12 @@ class Command(BaseCommand):
             training_session.end_date = end_date
 
         # Pickle the scaler
+        logger.debug('Saving the scalers...')
         if os.path.exists(training_session.scaler_path):
             old_sc_file = training_session.scaler_path
             new_sc_file = os.path.join(settings.BASE_DIR, 'scalers', 'archive',
-                                       f'{str(training_session.id)}_end_date_{training_session.end_date.isoformat()}')
+                                       f'{str(training_session.id)}_end'
+                                       f'_date_{training_session.end_date.isoformat()}')
             logger.debug(f'Archive {old_sc_file} to {new_sc_file}')
             os.rename(old_sc_file, new_sc_file)
 

@@ -149,6 +149,7 @@ class TrainingSession(models.Model):
 
     class Meta:
         unique_together = ('name', 'start_date', 'end_date', 'window_length', 'output_size',
+                           'evaluation_session',
                            'neurons', 'shuffle_buffer_size', 'training_size', 'epochs', 'batch_size',
                            'dropout', 'optimizer', 'loss', 'activation_func')
 
