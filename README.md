@@ -323,3 +323,9 @@ For example
 aws_access_key_id = XXXXX
 aws_secret_access_key = XXXYYYZZZ
 ``
+
+Then
+
+```bash
+eb create crypto-oracle --single --instance-types t3.medium --profile <myprofile>
+```
