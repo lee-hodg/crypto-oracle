@@ -329,7 +329,7 @@ aws_secret_access_key = XXXYYYZZZ
 Then
 
 ```bash
-eb create crypto-oracle --single --instance-types t3.medium --profile <myprofile>
+eb create crypto-oracle3 --single --instance-types t3.medium --profile <myprofile>
 ```
 
 Will need to updgrade the instance type and set the env vars
