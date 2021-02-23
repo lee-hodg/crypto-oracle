@@ -330,7 +330,7 @@ Then
 
 ```bash
 eb init --profile <myprofile>
-eb create crypto-oracle3 --single --instance-types t3.medium --profile <myprofile>
+eb create crypto-oracle3 --single -i t3.medium --profile <myprofile>
 ```
 
 Will need to **upgrade the instance type** (e.g. t3.medium) and set the env vars
