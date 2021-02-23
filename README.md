@@ -3,6 +3,14 @@
 This app explores the use of Long-short term memory (LSTM) neural networks in predicting the price
 of the cryptocurrency Bitcoin. 
 
+Locally you can train models and make forecasts (on a computer with enough memory and other resources to
+do this effectively).
+
+Next these can be synced to a remote database for display in the webapp
+(training does not occur on the web server). They can also easily be loaded into the `DisplayResults.ipynb`
+Jupyter notebook for analysis there.
+
+
 ## Project structure
 
 ### Notebooks
@@ -256,51 +264,6 @@ The location of the virtualenv set up by poetry can be found by running
 poetry config --list 
 ```
 
-# Heroku deploy and setup
-
-See also [here](https://devcenter.heroku.com/articles/getting-started-with-python#deploy-the-app)
-
-Create the heroku app with
-
-The project uses [whitenoise](http://whitenoise.evans.io/en/stable/) for self-serving on static files
-This involved adding the package with Poetry and then adding to the Django Middleware
-
-```python
-MIDDLEWARE = [
-  # 'django.middleware.security.SecurityMiddleware',
-  'whitenoise.middleware.WhiteNoiseMiddleware',
-  # ...
-]
-```
-
-We also use the [django-heroku](https://github.com/heroku/django-heroku) to care of a bunch
-of things like `ALLOWED_HOSTS` and static files settings.
-
-
-Create the app on Heroku
-
-```bash
-heroku create
-```
-The key can be generated with the command
-
-```bash
-python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
-```
-
-Set some environment variables
-
-```bash
-heroku config:set DJANGO_SECRET_KEY="XXXX"
-heroku config:set DJANGO_RUNTIME_ENVIRONMENT="production"
-```
-
-Now deploy with
-
-```bash
-git push heroku master
-```
-
 
 # AWS Deploy
 
@@ -330,10 +293,12 @@ Then
 
 ```bash
 eb init --profile <myprofile>
-eb create crypto-oracle3 --single -i t3.medium --profile <myprofile>
+eb create crypto-oracle --single -i t3.medium --profile <myprofile>
 ```
 
-Will need to **upgrade the instance type** (e.g. t3.medium) and set the env vars
+Will need to **upgrade the instance type** (e.g. t3.medium) and set the env vars.
+If the instance is too small, installing Tensorflow will lead to `MemoryError`.
+If some environment variable is missing it could lead to errors on one of the manage commands.
 
 ```
 DJANGO_RUNTIME_ENVIRONMENT
@@ -349,13 +314,55 @@ Note in AL2 the `PYTHONPATH` should already be set, and the method for installin
 the postgres module has changed in `01_packages.config`
 
 
-Debug
+To debug issues check the logs and to run problematic commands:
 
+```
+# SSH into the server
 eb ssh
-cd /var/app
-source venv/staging-LQM1lest/bin/activate
+
+# Load env variables
 sudo su -
 /opt/elasticbeanstalk/bin/get-config environment | jq -r 'to_entries | .[] | "export \(.key)=\"\(.value)\""' > /etc/profile.d/sh.local
-sudo su webapp
+sudo su ec2-user
 source /etc/profile.d/sh.local
+
+# Load virtualenv
+cd /var/app
+source venv/staging-LQM1lest/bin/activate
+cd current
+
+# Try command, e.g.
 python manage.py collectstatic
+```
+
+
+## Local postgres to rds
+
+Since training the models on the EC2 instance is impossible, I will try locally and just upload to AWS.
+The `Stock` remote table is updated nightly remotely, so I don't want to drop this table.
+Just override the training session and stockpredictions tables when new models to add to the app.
+
+
+First delete existing remote data:
+
+```
+psql -h 'XXXX.us-east-1.rds.amazonaws.com' -W '<dbname>' -U '<dbuser>' -p 5432 
+-c 'DELETE FROM predictor_stockprediction;'
+
+psql -h 'XXXX.us-east-1.rds.amazonaws.com' -W '<dbname>' -U '<dbuser>' -p 5432 
+-c 'DELETE FROM predictor_trainingsession;'
+```
+
+Now pipe the local tables to the remote database tables
+
+```
+PGPASSWORD='<localpass>' pg_dump  --data-only --table=predictor_trainingsession -h localhost
+ -U <local_db_user> <local_db_name>|psql -h 'XXXX.us-east-1.rds.amazonaws.com' -W '<remote_db_name>'
+  -U '<remote_db_user>' -p 5432
+  
+  PGPASSWORD='<localpass>' pg_dump  --data-only --table=predictor_stockprediction -h localhost
+ -U <local_db_user> <local_db_name>|psql -h 'XXXX.us-east-1.rds.amazonaws.com' -W '<remote_db_name>'
+  -U '<remote_db_user>' -p 5432
+```
+
+enter the remote password when promoted.

@@ -180,3 +180,8 @@ LOGGING = {
 
 COINAPI_KEY = '38E75959-B950-4001-AD67-D0FD3FA1226B'
 
+
+# Since we run w/o SSL, in order for csrf to be set
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SRF_COOKIE_HTTPONLY = False
