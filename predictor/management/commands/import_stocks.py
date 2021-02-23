@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from predictor.models import Stock
-from utils.utils import date_utc
+from utils.utils import valid_date
 import os
 import logging
 import pandas as pd
@@ -41,7 +41,7 @@ class Command(BaseCommand):
 
                         # Bulk insert the new data
                         model_instances = [Stock(name=stock.symbol,
-                                                 dt=date_utc(stock.date),
+                                                 dt=valid_date(stock.date),
                                                  open=float(stock.open) if stock.open else None,
                                                  high=float(stock.high) if stock.high else None,
                                                  low=float(stock.low) if stock.low else None,
