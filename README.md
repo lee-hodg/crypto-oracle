@@ -329,10 +329,11 @@ aws_secret_access_key = XXXYYYZZZ
 Then
 
 ```bash
+eb init --profile <myprofile>
 eb create crypto-oracle3 --single --instance-types t3.medium --profile <myprofile>
 ```
 
-Will need to updgrade the instance type and set the env vars
+Will need to upgrade the instance type and set the env vars
 
 ```
 RDS_DB_NAME
