@@ -304,7 +304,7 @@ git push heroku master
 
 # AWS Deploy
 
-First create the RDS instance
+First create the RDS instance and make a note of the credentials.
 
 Install `awswebcli` on your system:
 
@@ -333,9 +333,10 @@ eb init --profile <myprofile>
 eb create crypto-oracle3 --single --instance-types t3.medium --profile <myprofile>
 ```
 
-Will need to upgrade the instance type and set the env vars
+Will need to **upgrade the instance type** (e.g. t3.medium) and set the env vars
 
 ```
+DJANGO_RUNTIME_ENVIRONMENT
 RDS_DB_NAME
 RDS_USERNAME
 RDS_PASSWORD
@@ -346,3 +347,15 @@ DJANGO_SECRET_KEY
 
 Note in AL2 the `PYTHONPATH` should already be set, and the method for installing
 the postgres module has changed in `01_packages.config`
+
+
+Debug
+
+eb ssh
+cd /var/app
+source venv/staging-LQM1lest/bin/activate
+sudo su -
+/opt/elasticbeanstalk/bin/get-config environment | jq -r 'to_entries | .[] | "export \(.key)=\"\(.value)\""' > /etc/profile.d/sh.local
+sudo su webapp
+source /etc/profile.d/sh.local
+python manage.py collectstatic
