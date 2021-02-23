@@ -304,6 +304,8 @@ git push heroku master
 
 # AWS Deploy
 
+First create the RDS instance
+
 Install `awswebcli` on your system:
 
 ```bash
@@ -329,3 +331,17 @@ Then
 ```bash
 eb create crypto-oracle --single --instance-types t3.medium --profile <myprofile>
 ```
+
+Will need to updgrade the instance type and set the env vars
+
+```
+RDS_DB_NAME
+RDS_USERNAME
+RDS_PASSWORD
+RDS_HOSTNAME
+RDS_PORT
+DJANGO_SECRET_KEY
+```
+
+Note in AL2 the `PYTHONPATH` should already be set, and the method for installing
+the postgres module has changed in `01_packages.config`
