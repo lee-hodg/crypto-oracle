@@ -300,3 +300,26 @@ Now deploy with
 ```bash
 git push heroku master
 ```
+
+
+# AWS Deploy
+
+Install `awswebcli` on your system:
+
+```bash
+pip install --upgrade --user awsebcl
+```
+
+Add an AWS credentials profile to
+
+```bash 
+vim ~/.aws/credentials
+```
+
+For example
+
+```bash 
+[leehodg]
+aws_access_key_id = XXXXX
+aws_secret_access_key = XXXYYYZZZ
+``
