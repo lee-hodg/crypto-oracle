@@ -56,10 +56,10 @@ scipy==1.6.0; python_version >= "3.7"
 six==1.15.0; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.6.0" and python_version >= "3.6"
 soupsieve==2.2; python_version >= "3.6" and python_version < "4.0"
 sqlparse==0.4.1; python_version >= "3.6"
-tensorboard-plugin-wit==1.8.0 --install-option="--no-cache-dir"; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.2.0"
-tensorboard==2.4.1 --install-option="--no-cache-dir"; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.2.0"
-tensorflow-estimator==2.4.0 --install-option="--no-cache-dir"
-tensorflow==2.4.1  --install-option="--no-cache-dir"
+tensorboard-plugin-wit==1.8.0; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.2.0"
+tensorboard==2.4.1; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.2.0"
+tensorflow-estimator==2.4.0
+tensorflow==2.4.1
 termcolor==1.1.0
 threadpoolctl==2.1.0; python_version >= "3.6"
 typing-extensions==3.7.4.3
