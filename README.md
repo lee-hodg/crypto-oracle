@@ -325,19 +325,19 @@ vim ~/.aws/credentials
 For example
 
 ```bash 
-[leehodg]
+[myprofile]
 aws_access_key_id = XXXXX
 aws_secret_access_key = XXXYYYZZZ
 ``
 
-Then
+Then (use `i t3.medium` if need bigger instance)
 
 ```bash
 eb init --profile <myprofile>
-eb create crypto-oracle --single -i t3.medium --profile <myprofile>
+eb create crypto-oracle --single - --profile <myprofile>
 ```
 
-Will need to **upgrade the instance type** (e.g. t3.medium) and set the env vars.
+Will need to **upgrade the instance type** (e.g. t3.medium) if you want to use tensorflow and set the env vars.
 If the instance is too small, installing Tensorflow will lead to `MemoryError`.
 If some environment variable is missing it could lead to errors on one of the manage commands.
 
