@@ -17,8 +17,10 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
-ssm = boto3.client('ssm', region_name='us-east-1')
 ENV = os.environ.get('DJANGO_RUNTIME_ENVIRONMENT', 'local-development')
+
+if 'dev' not in ENV:
+    ssm = boto3.client('ssm', region_name='us-east-1')
 
 
 def get_ssm_key(name):
@@ -42,7 +44,7 @@ SECRET_KEY = get_ssm_key('/Django/SecretKey')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['crypto-oracle-4.eba-wn2btpcc.us-east-1.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['rypto-oracle.eba-2peapwue.us-east-1.elasticbeanstalk.com']
 
 
 # Application definition

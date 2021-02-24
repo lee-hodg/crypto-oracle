@@ -330,11 +330,11 @@ aws_access_key_id = XXXXX
 aws_secret_access_key = XXXYYYZZZ
 ``
 
-Then (use `i t3.medium` if need bigger instance)
+Then (use `-it t3.medium` if need bigger instance)
 
 ```bash
 eb init --profile <myprofile>
-eb create crypto-oracle --single - --profile <myprofile>
+eb create crypto-oracle --single -it t3.medium --profile <myprofile>
 ```
 
 Will need to **upgrade the instance type** (e.g. t3.medium) if you want to use tensorflow and set the env vars.
@@ -375,6 +375,10 @@ cd current
 # Try command, e.g.
 python manage.py collectstatic
 ```
+
+Check that the ec2 security group has access to postgres port, check that the IAM service roles for ebs/ec2
+have read ssm access, check that the RDS security group allows access from any IP on the relevant port.
+If 400 after successful deploy, check the allowed host matches the host EB provided.
 
 
 ## Local postgres to rds
