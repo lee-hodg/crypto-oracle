@@ -44,3 +44,5 @@ LOGGING['formatters']['verbose']['()'] = 'coloredlogs.ColoredFormatter'
 #                'level': 'DEBUG'}
 # LOGGING['loggers'].update({'django.db.backends': db_log_conf})
 
+
+SECRET_KEY = 'by#3b%eswwu)pbw_trqh0=)a**6qtl)599ufyt1%+@hsobruz2'

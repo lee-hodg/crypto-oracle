@@ -3,6 +3,21 @@
 {% block subtag %} Evaluate {% endblock %}
 
 {% block charts %}
+<div class="card text-left mb-5" >
+    <div class="card-header">
+        About Evaluations
+    </div>
+    <div class="card-body">
+        <p class="card-text">The dataset for evaluation models was split into the usual training and test sets,
+            and performance is evaluated on both sets. We also try a simple trading strategy: if the model
+            predicts a price rise in the next period we long and if it predicts a decrease we short.
+            Profits are recorded and plotted for this strategy and we also do a hypothesis test by comparing
+            how many times the long/short signal matches the desired signal (from actual data). This hypothesis
+            test tells us if we are doing any better than mere coin flipping.
+        </p>
+    </div>
+</div>
+
 <form>
     <div class="form-group">
         <div class="input-group">

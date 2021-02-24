@@ -3,6 +3,17 @@
 {% block subtag %} Forecast {% endblock %}
 
 {% block charts %}
+<div class="card text-left mb-5" >
+    <div class="card-header">
+        About Forecasts
+    </div>
+    <div class="card-body">
+        <p class="card-text">Forecast models were trained on all data available with the aim on making predictions
+        beyond that period by using all recent data. This is in contrast to <a  href="{% url 'predictor_evaluations' %}">Evaluation models</a>
+        that split the data into training and test sets to evaluate the model performance.
+        </p>
+    </div>
+</div>
 <form>
     <div class="form-group">
         <div class="input-group">
