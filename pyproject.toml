@@ -24,6 +24,8 @@ requests = "2.25.1"
 scipy = "1.6.0"
 scikit-learn = "0.24.1"
 boto3 = "^1.17.14"
+tensorflow = "2.4.1"
+Keras = "2.4.3"
 
 [tool.poetry.dev-dependencies]
 coloredlogs = "^15.0"
@@ -40,8 +42,7 @@ jupyter-console = "6.2.0"
 jupyter-core = "4.7.1"
 jupyterlab-pygments = "0.1.2"
 jupyterlab-widgets = "1.0.0"
-tensorflow = "2.4.1"
-Keras = "2.4.3"
+
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
