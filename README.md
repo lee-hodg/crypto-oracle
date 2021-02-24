@@ -376,9 +376,13 @@ cd current
 python manage.py collectstatic
 ```
 
-Check that the ec2 security group has access to postgres port, check that the IAM service roles for ebs/ec2
-have read ssm access, check that the RDS security group allows access from any IP on the relevant port.
-If 400 after successful deploy, check the allowed host matches the host EB provided.
+Common issues to check:
+
+   - The security group of the [EC2 instance](https://console.aws.amazon.com/ec2/v2/home?region=us-east-1) should allow
+     postgres on 5432 inbound on any IP.
+   - Verify that the IAM service roles for ebs/ec2  have read-only ssm access (see above)
+   - RDS security group allows access from any IP on the relevant port, 5432
+   - If 400 code after successful deploy, check the allowed host matches the host EB provided.
 
 
 ## Local postgres to rds
