@@ -10,19 +10,34 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 import os
+import boto3
 
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+ssm = boto3.client('ssm', region_name='us-east-1')
+ENV = os.environ.get('DJANGO_RUNTIME_ENVIRONMENT', 'local-development')
+
+
+def get_ssm_key(name):
+    try:
+        key = ssm.get_parameter(Name=name, WithDecryption=True)
+        return key['Parameter']['Value']
+    except Exception as exc:
+        if 'dev' in ENV:
+            # Allow silent fail in dev
+            return None
+        # Otherwise hard fail
+        raise exc
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = get_ssm_key('/Django/SecretKey')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -83,14 +98,15 @@ WSGI_APPLICATION = 'cryptooracle.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.environ['RDS_DB_NAME'],
-        'USER': os.environ['RDS_USERNAME'],
-        'PASSWORD': os.environ['RDS_PASSWORD'],
-        'HOST': os.environ['RDS_HOSTNAME'],
-        'PORT': os.environ['RDS_PORT'],
+        'NAME': get_ssm_key('/RDS/Name'),
+        'USER': get_ssm_key('/RDS/User'),
+        'PASSWORD': get_ssm_key('/RDS/Password'),
+        'HOST': get_ssm_key('/RDS/Hostname'),
+        'PORT': get_ssm_key('/RDS/Port'),
     }
 }
 

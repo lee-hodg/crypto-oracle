@@ -223,6 +223,11 @@ poetry init
 
 This will generate the `pyproject.toml` file, with the dependencies and dev dependencies
 
+Virtual in the project dir
+
+```
+poetry config virtualenvs.in-project true
+```
 For convenience during development we also have the following dev dependencies
 
 ```python
@@ -267,7 +272,43 @@ poetry config --list
 
 # AWS Deploy
 
-First create the RDS instance and make a note of the credentials.
+## Database
+
+First create the RDS instance and make a note of the credentials by
+going [here](https://console.aws.amazon.com/rds/home?region=us-east-1#launch-dbinstance:gdb=false;s3-import=false)
+and selecting `Standard Create` and `PostgreSQL`.
+Choose Public Access (to make our life easier for pushing from local to prod for this app)
+and choose or create a security group that has the 5432 port allowed from anywhere inbound.
+
+Wait for it to be created and then record the hostname endpoint too.
+
+
+## SSM Secrets
+
+
+Set the sensitive variables in the
+[SSM Parameter Store](https://console.aws.amazon.com/systems-manager/parameters/?region=us-east-1&tab=Table)
+using the RDS credentials obtained above
+
+
+```
+/RDS/Name
+/RDS/User
+/RDS/Password
+/RDS/Hostname
+/RDS/Port
+/Django/SecurityKey
+```
+
+### EBS
+
+Allow EBS and EC2 access to read SSM parameters
+Got [here](https://console.aws.amazon.com/iam/home#/roles) and select
+the `aws-elasticbeanstalk-ec2-role` role then attach the `AmazonSSMReadOnlyAccess`
+policy.
+
+Ensure the EC2 security and RDS groups both allow access on the relevant port.
+
 
 Install `awswebcli` on your system:
 
