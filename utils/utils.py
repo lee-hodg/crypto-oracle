@@ -556,7 +556,7 @@ def get_evaluation_plot(training_session_id, eval_type='train'):
     p = p/2
     logger.debug(f'Got p {p} and t {t}')
     reject_null = False
-    if t > 0 and p/2 < alpha:
+    if t > 0 and p < alpha:
         # We are looking for greater than 0.5 at level alpha (if t< 0 it means the mean was actually less
         # than 0.5 and no way we reject it the null and claim we are doing better than 50% coin...we may
         # even be doing worse with some signif like 0.4 matches)

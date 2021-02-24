@@ -384,15 +384,31 @@ Common issues to check:
    - RDS security group allows access from any IP on the relevant port, 5432
    - If 400 code after successful deploy, check the allowed host matches the host EB provided.
 
+Future deploys are with
+
+```
+eb deploy crypto-oracle --profile <myprofile>
+```
 
 ## Local postgres to rds
 
+#### Initial
+
+Copy whole local db to remote
+
+```
+pg_dump -Fc --no-acl --no-owner -h localhost -U coracle cryptooracle_db -f cdb.pg
+pg_restore --no-owner -n public -c -1 -p 5432 -U <remote_user> -h XXXX.us-east-1.rds.amazonaws.com -d postgres cbd.pg
+```
+
+#### Updating tables after local training
+
+
 Since training the models on the EC2 instance is impossible, I will try locally and just upload to AWS.
 The `Stock` remote table is updated nightly remotely, so I don't want to drop this table.
-Just override the training session and stockpredictions tables when new models to add to the app.
+Just override the training session and stock predictions tables when new models to add to the app.
 
-
-First delete existing remote data:
+First delete existing remote data in those tables:
 
 ```
 psql -h 'XXXX.us-east-1.rds.amazonaws.com' -W '<dbname>' -U '<dbuser>' -p 5432 
