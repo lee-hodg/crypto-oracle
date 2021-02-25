@@ -41,19 +41,26 @@
                 </option>
                 {% endfor %}
             </select>
-        </div>
-        <div class="input-group">
 
-            <div class="input-group-prepend">
-                <span class="input-group-text">Coins</span>
+            <div class="form-check ml-2">
+                <input class="form-check-input" type="checkbox" value="" id="fiat_only_checkbox" checked>
+                <label class="form-check-label" for="fiat_only_checkbox">
+                    Fiat Only
+                </label>
             </div>
-            <select class="selectpicker" id="coin_select" size="7" multiple>
-                {% for coin in coins %}
-                <option id="{{coin}}">{{coin}}</option>
-                {% endfor %}
-            </select>
-        <!--        <label for="exampleFormControlSelect1">Select training session</label>-->
         </div>
+<!--        <div class="input-group">-->
+
+<!--            <div class="input-group-prepend">-->
+<!--                <span class="input-group-text">Coins</span>-->
+<!--            </div>-->
+<!--            <select class="selectpicker" id="coin_select" size="7" multiple>-->
+<!--                {% for coin in coins %}-->
+<!--                <option id="{{coin}}">{{coin}}</option>-->
+<!--                {% endfor %}-->
+<!--            </select>-->
+<!--        &lt;!&ndash;        <label for="exampleFormControlSelect1">Select training session</label>&ndash;&gt;-->
+<!--        </div>-->
     </div>
 
 </form>
@@ -86,15 +93,17 @@
     function handleFormChange(){
         let period = $('#period_select').children(":selected").val();
         let platform = $('#platform_select').children(":selected").val();
-        let coin = $('#coin_select').val();
+        // let coin = $('#coin_select').val();
         let start_date = $('#start_date').val();
         let end_date = $('#end_date').val();
+        let fiat_only = $('#fiat_only_checkbox').prop('checked')
 
-        console.debug('got platform: ' + platform)
-        console.debug('got period: ' + platform)
-        console.debug('got coin: ' + coin)
-        console.debug('start ' + start_date)
-        console.debug('end ' + end_date)
+        console.debug('got platform: ' + platform);
+        console.debug('got period: ' + platform);
+        //console.debug('got coin: ' + coin);
+        console.debug('start ' + start_date);
+        console.debug('end ' + end_date);
+        console.debug('fiat only' + fiat_only);
 
         $.ajax({
             url: "{% url 'predictor_lending_rate' %}",
@@ -102,7 +111,8 @@
             data: {
                 "platform": platform,
                 "period": period,
-                "coin": coin,
+                // "coin": coin,
+                "fiat_only": fiat_only,
                 "start_date": start_date,
                 "end_date": end_date
                 //'csrfmiddlewaretoken':

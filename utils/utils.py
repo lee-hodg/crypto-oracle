@@ -578,12 +578,14 @@ def get_evaluation_plot(training_session_id, eval_type='train'):
     return [(graph_0, layout_0), (graph_1, layout_1)]
 
 
-def get_lending_rates(platform, coin, period, start_date, end_date):
+def get_lending_rates(platform, period, start_date, end_date, fiat_only):
 
     # Load the Django model corresponding to these options
     lending_rates = LendingRate.objects.filter(platform=platform)
-    if coin:
-        lending_rates = lending_rates.filter(coin__in=coin)
+    if fiat_only:
+        lending_rates = lending_rates.filter(coin__in=settings.FIAT_CODES)
+    # if coin:
+    #     lending_rates = lending_rates.filter(coin__in=coin)
     if start_date:
         start_date = parse(start_date) if isinstance(start_date, str) else start_date
         lending_rates = lending_rates.filter(dt__gte=start_date)
