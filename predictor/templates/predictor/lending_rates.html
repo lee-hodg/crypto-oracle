@@ -1,0 +1,152 @@
+{% extends "predictor/base.html" %}
+{% load static %}
+{% block subtag %} Lending Rates {% endblock %}
+
+{% block charts %}
+<div class="card text-left mb-5" >
+    <div class="card-header">
+        About Lending Rates
+    </div>
+    <div class="card-body">
+        <p class="card-text">These charts shows the lending rates from popular exchanges over time
+            for a variety of coins.
+        </p>
+    </div>
+</div>
+<form>
+    <div class="form-group">
+        <div class="input-group">
+            <input id="start_date" type="text" class="ui-datepicker form-control" placeholder="Start Date">
+            <div class="input-group-prepend">
+                <span class="input-group-text">-</span>
+            </div>
+            <input id="end_date" type="text" class="ui-datepicker form-control" placeholder="End Date">
+            <div class="input-group-prepend">
+                <span class="input-group-text">Platform</span>
+            </div>
+            <select class="form-control" id="platform_select">
+                {% for platform in platforms %}
+                <option id="{{platform}}"
+                        {% if platform == selected_platform %}selected="selected"{% endif %}>{{platform}}
+                </option>
+                {% endfor %}
+            </select>
+            <div class="input-group-prepend">
+                <span class="input-group-text">Period</span>
+            </div>
+            <select class="form-control" id="period_select">
+                {% for period in periods %}
+                <option id="{{period}}"
+                        {% if period == selected_period %}selected="selected"{% endif %}>{{period}}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <!--        <label for="exampleFormControlSelect1">Select training session</label>-->
+
+    </div>
+
+</form>
+
+
+<!--top chart-->
+<div class="row">
+    <div class="col-12">
+        <img class="ajax-loader mt-5" src="{% static 'predictor/ajax-loader.gif' %}" />
+        <div id="{{ids.0}}" class="chart"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            $(".ajax-loader").show();
+            $(".chart").hide()
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to relative URLs i.e. locally.
+                // xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+
+            }
+        }
+    });
+
+    function handleFormChange(){
+        let period = $('#period_select').children(":selected").val();
+        let platform = $('#platform_select').children(":selected").val();
+        let start_date = $('#start_date').val();
+        let end_date = $('#end_date').val();
+
+        console.debug('got platform: ' + platform)
+        console.debug('got period: ' + platform)
+        console.debug('start ' + start_date)
+        console.debug('end ' + end_date)
+
+        $.ajax({
+            url: "{% url 'predictor_lending_rate' %}",
+            type: "POST",
+            data: {
+                "platform": platform,
+                "period": period,
+                "start_date": start_date,
+                "end_date": end_date
+                //'csrfmiddlewaretoken':
+            },
+            contentType: 'application/x-www-form-urlencoded; charset=utf-8',
+            //contentType: "application/json",
+            //contentType: "application/json;charset=utf-8",
+            // headers: {'X-CSRFToken': getCookie('csrftoken')},
+            dataType: "json",
+            success: function(res_data) {
+                //alert(data);
+                //plots the figure with id
+                //id must match the div id above in the html
+                let figures = JSON.parse(res_data.figuresJSON);
+                let ids = res_data.ids;
+                $(".chart").show()
+
+                for (let i in figures) {
+                    console.log('Loop numb:' + i);
+                    // console.debug(ids[i])
+                    //$('#'+ids[i]).empty()
+                    //console.debug($('#'+ids[i]))
+                    Plotly.newPlot(ids[i], figures[i].data, figures[i].layout || {});
+                    // Plotly.plot(ids[i],
+                    //     figures[i].data,
+                    //     figures[i].layout || {});
+                }
+                $(".ajax-loader").hide();
+            },
+            error: function(ts) {
+                console.error(ts);
+            }
+        });
+    }
+    $(document).on('change', '#period_select', function(){
+        handleFormChange()
+    });
+    $(document).on('change', '#platform_select', function(){
+        handleFormChange()
+    });
+    $(document).on('change', '.form-group input', function(){
+        handleFormChange()
+    });
+</script>
+
+<script>
+    $(document).ready(function(){
+        let date_input=$('input.ui-datepicker');
+        let container=$('.bootstrap-iso form').length>0 ? $('.bootstrap-iso form').parent() : "body";
+        let options={
+            format: 'yyyy/mm/dd',
+            container: container,
+            todayHighlight: true,
+            autoclose: true,
+        };
+        date_input.datepicker(options);
+    })
+</script>
+
+{% endblock %}

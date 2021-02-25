@@ -173,3 +173,37 @@ class StockPrediction(models.Model):
 
     class Meta:
         unique_together = ('training_session', 'dt')
+
+
+class LendingRate(models.Model):
+    """
+    Model representing lending rate from ftx or other platforms
+    """
+    # The name of the stock
+    PLATFORMS = Choices(('ftx', _('FTX')), ('kucoin', _('KuCoin')))
+    platform = models.CharField(choices=PLATFORMS, default=PLATFORMS.ftx, max_length=20)
+
+    # Which coin/fiat are we lending?
+    coin = models.CharField(max_length=20)
+
+    # The datetime the rate was obtained
+    dt = models.DateTimeField(null=False, blank=False, db_index=True)
+
+    # The hourly lending rate data
+    previous = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=False)
+    estimate = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=False)
+
+    @property
+    def day_estimate(self):
+        return ((1+self.estimate)**24)-1
+
+    @property
+    def annual_estimate(self):
+        return ((1+self.estimate)**(24*365))-1
+
+    def __repr__(self):
+        return f'{self.dt}: {self.platform}: {self.coin}: {self.estimate}'
+
+    class Meta:
+        unique_together = ('platform', 'coin', 'dt')
+        ordering = ['dt']

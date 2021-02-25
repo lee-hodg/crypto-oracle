@@ -4,6 +4,7 @@ Collection of helper functions
 import tensorflow as tf
 import logging
 import argparse
+import numpy as np
 import psycopg2
 import pandas as pd
 import sys
@@ -17,7 +18,7 @@ from dateutil.tz import tzutc
 from dateutil.parser import parse
 from django.utils.timezone import make_aware
 from django.conf import settings
-from predictor.models import TrainingSession
+from predictor.models import TrainingSession, LendingRate
 logger = logging.getLogger(__name__)
 
 
@@ -577,3 +578,49 @@ def get_evaluation_plot(training_session_id, eval_type='train'):
     return [(graph_0, layout_0), (graph_1, layout_1)]
 
 
+def get_lending_rates(platform, period, start_date, end_date):
+
+    # Load the Django model corresponding to these options
+    lending_rates = LendingRate.objects.filter(platform=platform)
+    if start_date:
+        start_date = parse(start_date) if isinstance(start_date, str) else start_date
+        lending_rates = lending_rates.filter(dt__gte=start_date)
+    if end_date:
+        end_date = parse(end_date) if isinstance(end_date, str) else end_date
+        lending_rates = lending_rates.filter(dt__lte=end_date)
+
+    df = read_frame(lending_rates)
+    df.drop(columns=['id', 'platform', 'previous'], inplace=True)
+    # % hourly
+    df['hourly_estimate'] = 100*df['estimate']
+
+    # For now just work with annual est
+    if period == 'Annual':
+        # % annual
+        values_name = 'annual_estimate'
+        df[values_name] = df['hourly_estimate'].apply(lambda x: 100*(np.power(1+float(x/100), 24*365)-1))
+    elif period == 'Daily':
+        # % daily
+        values_name = 'daily_estimate'
+        df[values_name] = df['hourly_estimate'].apply(lambda x: 100*(np.power(1+float(x/100), 24)-1))
+    else:
+        values_name = 'hourly_estimate'
+
+    pivot_df = df.pivot(index='dt', columns='coin', values=values_name)
+    pivot_df = pivot_df.sort_values(by='dt', ascending=True)
+
+    graph = []
+    for coin in pivot_df.columns:
+        graph.append(go.Scatter(x=pivot_df.index.tolist(),
+                                y=pivot_df[coin].tolist(),
+                                mode='lines',
+                                name=coin)
+                     )
+
+    layout = dict(title=f'Lending rate over time for {platform} (% {period} rate)',
+                  xaxis=dict(title='Date',
+                             autotick=True),
+                  yaxis=dict(title="Lending Rate"),
+                  )
+
+    return graph, layout

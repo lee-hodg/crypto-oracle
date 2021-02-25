@@ -85,8 +85,11 @@ class Command(BaseCommand):
         # then we neglect the final pred since it uses the final 5 elements of training set to pred a subsequent
         # element, which
         # we have no training data to compare with
+        # if we made a prediction of output size bigger than 1 step ahead for now just take the 1st
+        first_preds = [p[0] for p in preds]
         res_df = pd.DataFrame({'dt': date_range,
-                               'y': dataset.flatten()[window_len:], 'yhat': preds.flatten()[:-output_size]})
+                               'y': dataset.flatten()[window_len:],
+                               'yhat': first_preds[:-1]})
 
         # Want to inverse the normalization transform
         if scaler is not None:

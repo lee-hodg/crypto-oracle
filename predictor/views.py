@@ -1,11 +1,11 @@
 from django.shortcuts import render
 from django_pandas.io import read_frame
-from predictor.models import Stock, TrainingSession
+from predictor.models import Stock, TrainingSession, LendingRate
 from django.utils import timezone
 from django.http import JsonResponse
 from django.db.models import Q
 from datetime import timedelta
-from utils.utils import get_forecast_plots, get_evaluation_plot
+from utils.utils import get_forecast_plots, get_evaluation_plot, get_lending_rates
 
 import plotly.graph_objs as go
 import json
@@ -76,7 +76,7 @@ def index(request):
     :return:
     """
     now = timezone.now()
-    start_date = now - timedelta(days=5)
+    start_date = now - timedelta(days=50)
     end_date = now
 
     qs = Stock.objects.filter(Q(dt__gte=start_date) & Q(dt__lte=end_date)).order_by('dt')
@@ -172,3 +172,43 @@ def evaluations(request):
     else:
         ctx_data['training_session_objs'] = TrainingSession.objects.filter(evaluation_session=True)
         return render(request, 'predictor/evaluations.html', ctx_data)
+
+
+def lending_rate(request):
+    """
+    The lending rates
+
+    :param request:
+    :return:
+    """
+    # Which platform are we plotting? eg ftx
+    platform = request.POST.get('platform', 'ftx')
+    period = request.POST.get('period', 'Annual')
+
+    # The date range
+    start_date = request.POST.get('start_date', timezone.now() - timedelta(days=30))
+    end_date = request.POST.get('end_date', timezone.now())
+
+    logger.debug(f'Plot platform {platform}, period {period} from {start_date} to {end_date}')
+    graph_0, layout_0 = get_lending_rates(platform, period, start_date, end_date)
+
+    # append all charts to the figures list
+    figures = [dict(data=graph_0, layout=layout_0)]
+
+    # plot ids for the html id tag
+    ids = [f'figure-{i}' for i, _ in enumerate(figures)]
+
+    # Convert the plotly figures to JSON for javascript in html template
+    figures_json = json.dumps(figures, cls=plotly.utils.PlotlyJSONEncoder)
+
+    ctx_data = {'ids': ids,
+                'figuresJSON': figures_json}
+
+    if request.is_ajax():
+        return JsonResponse(ctx_data)
+    else:
+        ctx_data['platforms'] = list(LendingRate.PLATFORMS._display_map.keys())
+        ctx_data["selected_period"] = period
+        ctx_data["selected_platform"] = platform
+        ctx_data['periods'] = {'Hourly', 'Daily', 'Annual'}
+        return render(request, 'predictor/lending_rates.html', ctx_data)

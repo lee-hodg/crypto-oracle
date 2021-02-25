@@ -203,3 +203,8 @@ COINAPI_KEY = '38E75959-B950-4001-AD67-D0FD3FA1226B'
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_SECURE = False
 SRF_COOKIE_HTTPONLY = False
+
+# FTX
+if 'dev' not in ENV:
+    FTX_API_KEY = get_ssm_key('/Platform/FTX/API/Key')
+    FTX_API_SECRET = get_ssm_key('/Platform/FTX/API/Secret')
