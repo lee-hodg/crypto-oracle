@@ -2,7 +2,7 @@ from django.contrib import admin
 
 # Register your models here.
 from django.contrib import admin
-from .models import TrainingSession, Stock, StockPrediction
+from .models import TrainingSession, Stock, StockPrediction, LendingRate
 
 
 class TrainingSessionAdmin(admin.ModelAdmin):
@@ -57,3 +57,20 @@ class StockPredictionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(StockPrediction, StockPredictionAdmin)
+
+
+class LendingRateAdmin(admin.ModelAdmin):
+    list_display = [
+        'id',
+        'platform',
+        'dt',
+        'coin',
+        'estimate'
+    ]
+
+    class Meta:
+        model = LendingRate
+
+
+admin.site.register(LendingRate, LendingRateAdmin)
+
