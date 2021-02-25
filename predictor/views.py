@@ -209,11 +209,11 @@ def lending_rate(request):
         return JsonResponse(ctx_data)
     else:
         # These are coins on latest dt sorted by biggest est first
-        latest_dt = LendingRate.objects.latest('dt')
-        if latest_dt:
+        try:
+            latest_lr = LendingRate.objects.latest('dt')
             ctx_data['coins'] = list(LendingRate.objects.filter(
-                dt=latest_dt.dt).order_by('-estimate').values_list('coin', flat=True).distinct())
-        else:
+                dt=latest_lr.dt).order_by('-estimate').values_list('coin', flat=True).distinct())
+        except LendingRate.DoesNotExist:
             ctx_data['coins'] = []
         ctx_data['platforms'] = list(LendingRate.PLATFORMS._display_map.keys())
         ctx_data["selected_period"] = period
