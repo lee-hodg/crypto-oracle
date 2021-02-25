@@ -3,4 +3,4 @@ Production settings
 """
 from .base import *
 
-DEBUG = False   # Always False for production
+DEBUG = True   # Always False for production
