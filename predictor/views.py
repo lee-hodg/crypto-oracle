@@ -76,7 +76,7 @@ def index(request):
     :return:
     """
     now = timezone.now()
-    start_date = now - timedelta(days=50)
+    start_date = now - timedelta(days=5)
     end_date = now
 
     qs = Stock.objects.filter(Q(dt__gte=start_date) & Q(dt__lte=end_date)).order_by('dt')
@@ -184,13 +184,14 @@ def lending_rate(request):
     # Which platform are we plotting? eg ftx
     platform = request.POST.get('platform', 'ftx')
     period = request.POST.get('period', 'Annual')
+    coin = request.POST.getlist('coin[]', None)
 
     # The date range
     start_date = request.POST.get('start_date', timezone.now() - timedelta(days=30))
     end_date = request.POST.get('end_date', timezone.now())
 
-    logger.debug(f'Plot platform {platform}, period {period} from {start_date} to {end_date}')
-    graph_0, layout_0 = get_lending_rates(platform, period, start_date, end_date)
+    logger.debug(f'Plot platform {platform}, coin {coin}, period {period} from {start_date} to {end_date}')
+    graph_0, layout_0 = get_lending_rates(platform, coin, period, start_date, end_date)
 
     # append all charts to the figures list
     figures = [dict(data=graph_0, layout=layout_0)]
@@ -207,6 +208,9 @@ def lending_rate(request):
     if request.is_ajax():
         return JsonResponse(ctx_data)
     else:
+        # These are coins on latest dt sorted by biggest est first
+        ctx_data['coins'] = list(LendingRate.objects.filter(
+            dt=LendingRate.objects.latest('dt').dt).order_by('-estimate').values_list('coin', flat=True).distinct())
         ctx_data['platforms'] = list(LendingRate.PLATFORMS._display_map.keys())
         ctx_data["selected_period"] = period
         ctx_data["selected_platform"] = platform

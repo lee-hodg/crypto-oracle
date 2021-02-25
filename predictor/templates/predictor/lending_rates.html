@@ -42,8 +42,18 @@
                 {% endfor %}
             </select>
         </div>
-        <!--        <label for="exampleFormControlSelect1">Select training session</label>-->
+        <div class="input-group">
 
+            <div class="input-group-prepend">
+                <span class="input-group-text">Coins</span>
+            </div>
+            <select class="selectpicker" id="coin_select" size="7" multiple>
+                {% for coin in coins %}
+                <option id="{{coin}}">{{coin}}</option>
+                {% endfor %}
+            </select>
+        <!--        <label for="exampleFormControlSelect1">Select training session</label>-->
+        </div>
     </div>
 
 </form>
@@ -76,11 +86,13 @@
     function handleFormChange(){
         let period = $('#period_select').children(":selected").val();
         let platform = $('#platform_select').children(":selected").val();
+        let coin = $('#coin_select').val();
         let start_date = $('#start_date').val();
         let end_date = $('#end_date').val();
 
         console.debug('got platform: ' + platform)
         console.debug('got period: ' + platform)
+        console.debug('got coin: ' + coin)
         console.debug('start ' + start_date)
         console.debug('end ' + end_date)
 
@@ -90,6 +102,7 @@
             data: {
                 "platform": platform,
                 "period": period,
+                "coin": coin,
                 "start_date": start_date,
                 "end_date": end_date
                 //'csrfmiddlewaretoken':
@@ -128,6 +141,9 @@
         handleFormChange()
     });
     $(document).on('change', '#platform_select', function(){
+        handleFormChange()
+    });
+    $(document).on('change', '#coin_select', function(){
         handleFormChange()
     });
     $(document).on('change', '.form-group input', function(){
