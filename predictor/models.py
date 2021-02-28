@@ -193,6 +193,9 @@ class LendingRate(models.Model):
     previous = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=False)
     estimate = models.DecimalField(max_digits=19, decimal_places=10, null=True, blank=False)
 
+    # term of loan
+    term = models.PositiveSmallIntegerField(null=True)
+
     @property
     def day_estimate(self):
         return ((1+self.estimate)**24)-1
@@ -205,5 +208,5 @@ class LendingRate(models.Model):
         return f'{self.dt}: {self.platform}: {self.coin}: {self.estimate}'
 
     class Meta:
-        unique_together = ('platform', 'coin', 'dt')
+        unique_together = ('platform', 'coin', 'dt', 'term')
         ordering = ['dt']

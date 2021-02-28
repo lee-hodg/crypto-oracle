@@ -594,7 +594,11 @@ def get_lending_rates(platform, period, start_date, end_date, fiat_only):
         lending_rates = lending_rates.filter(dt__lte=end_date)
 
     df = read_frame(lending_rates)
-    df.drop(columns=['id', 'platform', 'previous'], inplace=True)
+
+    df['term'] = df['term'].fillna('')
+    df['coin'] = df['coin'] + df['term'].astype('str')
+
+    df.drop(columns=['id', 'platform', 'previous', 'term'], inplace=True)
     # % hourly
     df['hourly_estimate'] = 100*df['estimate']
 

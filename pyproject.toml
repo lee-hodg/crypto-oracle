@@ -28,6 +28,7 @@ tensorflow = "2.4.1"
 Keras = "2.4.3"
 ftx = "^1.0.2"
 ciso8601 = "^2.1.3"
+kucoin-python = "^1.0.5"
 
 [tool.poetry.dev-dependencies]
 coloredlogs = "^15.0"
